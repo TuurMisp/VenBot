@@ -1,5 +1,5 @@
 // Load .env from parent folder
-require('dotenv').config({ path: '../.env' });
+//require('dotenv').config({ path: '../.env' });
 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');
