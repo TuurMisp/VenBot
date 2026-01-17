@@ -1,8 +1,10 @@
 const { REST, Routes } = require("discord.js");
 require("dotenv").config();
 
+const venerationCommand = require("./commands/veneration");
+
 const commands = [
-    // command data
+    venerationCommand.data.toJSON()
 ];
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
@@ -16,7 +18,7 @@ const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
             { body: commands }
         );
 
-        console.log("Global slash commands registered.");
+        console.log("✅ Global slash commands registered.");
     } catch (error) {
         console.error(error);
     }

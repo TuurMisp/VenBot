@@ -1,45 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
 
-function totalMonthsBetween(fromDate, toDate) {
-    let months =
-        (toDate.getFullYear() - fromDate.getFullYear()) * 12 +
-        (toDate.getMonth() - fromDate.getMonth());
-
-    if (toDate.getDate() < fromDate.getDate()) {
-        months--;
-    }
-
-    return months;
-}
-
-function checkVenerations(startDate, venerationNumber) {
-    const currentDate = new Date();
-
-    if (venerationNumber < 1 || venerationNumber > 12) {
-        return "❌ Veneration must be between 1 and 12.";
-    }
-
-    const monthsElapsed = totalMonthsBetween(startDate, currentDate);
-    const requiredMonths = venerationNumber * 3;
-
-    let result = `**Veneration ${venerationNumber}**\n`;
-    result += `Required: ${requiredMonths} months\n`;
-    result += `Elapsed: ${monthsElapsed} months\n\n`;
-
-    if (monthsElapsed >= requiredMonths) {
-        result += "✅ **Eligible for this veneration**\n";
-    } else {
-        result += "❌ **Not eligible yet**\n";
-    }
-
-    const indefectibleDate = new Date("2021-05-01");
-    if (startDate < indefectibleDate) {
-        result += "\n🏅 **Eligible for the l'indéfectible medal**";
-    }
-
-    return result;
-}
-
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("veneration")
@@ -54,9 +14,9 @@ module.exports = {
             option
                 .setName("number")
                 .setDescription("Veneration number (1–12)")
-                .setRequired(true)
                 .setMinValue(1)
                 .setMaxValue(12)
+                .setRequired(true)
         ),
 
     async execute(interaction) {
@@ -64,6 +24,8 @@ module.exports = {
         const venerationNumber = interaction.options.getInteger("number");
 
         const startDate = new Date(joinDateInput);
+        const currentDate = new Date();
+
         if (isNaN(startDate.getTime())) {
             return interaction.reply({
                 content: "❌ Invalid date format. Use YYYY-MM-DD.",
@@ -71,8 +33,36 @@ module.exports = {
             });
         }
 
-        const result = checkVenerations(startDate, venerationNumber);
+        function totalMonthsBetween(fromDate, toDate) {
+            let months =
+                (toDate.getFullYear() - fromDate.getFullYear()) * 12 +
+                (toDate.getMonth() - fromDate.getMonth());
 
-        await interaction.reply(result);
+            if (toDate.getDate() < fromDate.getDate()) {
+                months--;
+            }
+
+            return months;
+        }
+
+        const monthsElapsed = totalMonthsBetween(startDate, currentDate);
+        const requiredMonths = venerationNumber * 3;
+
+        let reply =
+            `📅 **Months elapsed:** ${monthsElapsed}\n` +
+            `🏅 **Veneration ${venerationNumber}:** ${requiredMonths} months required\n\n`;
+
+        if (monthsElapsed >= requiredMonths) {
+            reply += "✅ **Eligible for this veneration**\n";
+        } else {
+            reply += `❌ **Not eligible yet** (${monthsElapsed}/${requiredMonths})\n`;
+        }
+
+        const indefectibleDate = new Date("2021-05-01");
+        if (startDate < indefectibleDate) {
+            reply += "\n🏵️ **Eligible for the l'indéfectible medal**";
+        }
+
+        await interaction.reply(reply);
     }
 };
